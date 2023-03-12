@@ -1,0 +1,39 @@
+version: '3.7'
+
+services:
+  wallet-database:
+    container_name: wallet_database
+    image: postgres:12.7-alpine
+    restart: unless-stopped
+    environment:
+      - POSTGRES_DB=wallet
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=secret
+    volumes:
+      - db-volume:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - web
+
+  wallet-service:
+    container_name: wallet_service
+    image: wallet_service:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    ports:
+      - '8080:8080'
+    depends_on:
+      - wallet-database
+    networks:
+      - web
+
+
+networks:
+  web:
+    name: web
+
+volumes:
+  db-volume: { }

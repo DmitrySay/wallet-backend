@@ -1,0 +1,50 @@
+###
+POST http://localhost:8080/api/v1/wallets/new
+Content-Type: application/json
+
+{
+  "name": "Euro Wallet",
+  "description": "currency EURO"
+}
+###
+#{
+#  "name": "Dollar Wallet",
+#  "description": "currency USD"
+#}
+
+#{
+#  "name": "Zloty Wallet",
+#  "description": "currency PZN"
+#}
+
+
+###
+POST http://localhost:8080/api/v1/wallets/wallet/amount/add
+Content-Type: application/json
+
+{
+  "walletId": 1,
+  "amount": "99.01"
+}
+
+
+###
+POST http://localhost:8080/api/v1/wallets/wallet/amount/remove
+Content-Type: application/json
+
+{
+  "walletId": 1,
+  "amount": "0.01"
+}
+
+
+###
+GET http://localhost:8080/api/v1/wallets?page=0&size=100&sort=id,asc
+Accept: application/json
+
+
+
+
+
+
+
