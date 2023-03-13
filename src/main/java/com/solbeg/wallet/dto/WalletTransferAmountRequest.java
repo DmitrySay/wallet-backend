@@ -9,10 +9,13 @@ import lombok.Data;
 import java.math.BigDecimal;
 
 @Data
-public class WalletAddAmountRequest {
+public class WalletTransferAmountRequest {
 
     @NotNull
-    private Long walletId;
+    private Long walletIdFrom;
+
+    @NotNull
+    private Long walletIdTo;
 
     @DecimalMin(value = "0.01", message = "Amount can not be less than 0.01")
     @Digits(integer = 12, fraction = 2)

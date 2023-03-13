@@ -5,6 +5,7 @@ import com.solbeg.wallet.dto.WalletAddAmountRequest;
 import com.solbeg.wallet.dto.WalletCreateRequest;
 import com.solbeg.wallet.dto.WalletRemoveAmountRequest;
 import com.solbeg.wallet.dto.WalletResponse;
+import com.solbeg.wallet.dto.WalletTransferAmountRequest;
 import com.solbeg.wallet.exceptions.RestException;
 import com.solbeg.wallet.mapper.WalletMapper;
 import com.solbeg.wallet.model.Wallet;
@@ -16,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -60,11 +62,28 @@ public class WalletService {
     public WalletResponse removeAmountFromWallet(WalletRemoveAmountRequest request) {
         Wallet wallet = getById(request.getWalletId());
         BigDecimal balance = wallet.getBalance().subtract(request.getAmount());
-        if (BigDecimal.ZERO.compareTo(balance) > 0) {
-            throw new RestException("Balance is less then zero. Not allowed.");
-        }
+        validateBalance(balance);
         wallet.setBalance(balance);
         walletRepository.save(wallet);
         return walletMapper.toDto(wallet);
+    }
+
+    @Transactional
+    public void transferAmount(WalletTransferAmountRequest request) {
+        Wallet walletFrom = getById(request.getWalletIdFrom());
+        Wallet walletTo = getById(request.getWalletIdTo());
+
+        BigDecimal balanceFrom = walletFrom.getBalance().subtract(request.getAmount());
+        validateBalance(balanceFrom);
+        BigDecimal balanceTo = walletTo.getBalance().add(request.getAmount());
+        walletFrom.setBalance(balanceFrom);
+        walletTo.setBalance(balanceTo);
+        walletRepository.saveAll(List.of(walletFrom));
+    }
+
+    private static void validateBalance(BigDecimal balance) {
+        if (BigDecimal.ZERO.compareTo(balance) > 0) {
+            throw new RestException("Balance is less then zero. Not allowed.");
+        }
     }
 }
