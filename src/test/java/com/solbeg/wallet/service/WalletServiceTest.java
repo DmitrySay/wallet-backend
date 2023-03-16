@@ -38,29 +38,29 @@ class WalletServiceTest {
         //given
         WalletAddAmountRequest request = new WalletAddAmountRequest();
         request.setWalletId(1L);
-        request.setAmount(new BigDecimal(5.60));
+        request.setAmount(new BigDecimal("5.60"));
 
         Wallet existingWallet = new Wallet();
-        existingWallet.setId(1l);
+        existingWallet.setId(1L);
         existingWallet.setName("wallet");
         existingWallet.setDescription("USD");
-        existingWallet.setBalance(new BigDecimal(10.50));
+        existingWallet.setBalance(new BigDecimal("10.50"));
         Optional<Wallet> mockWallet = Optional.of(existingWallet);
 
         WalletResponse walletResponse = new WalletResponse();
-        walletResponse.setId(1l);
+        walletResponse.setId(1L);
         walletResponse.setName("wallet");
         walletResponse.setDescription("USD");
-        walletResponse.setBalance(new BigDecimal(16.10));
+        walletResponse.setBalance(new BigDecimal("16.10"));
 
         //when
-        when(walletRepository.findById(1l)).thenReturn(mockWallet);
+        when(walletRepository.findById(1L)).thenReturn(mockWallet);
         when(walletMapper.toDto(any(Wallet.class))).thenReturn(walletResponse);
 
         WalletResponse response = walletService.addAmountToWallet(request);
 
         //then
-        verify(walletRepository, times(1)).save(any(Wallet.class));
+        verify(walletRepository, times(1)).save(existingWallet);
         assertEquals(response.getId(), existingWallet.getId());
         assertEquals(response.getName(), existingWallet.getName());
         assertEquals(response.getDescription(), existingWallet.getDescription());
