@@ -5,13 +5,13 @@ spring:
   application:
     name: wallet-service
 
-  flyway:
+  liquibase:
     enabled: true
-    validate-on-migrate: true
+    change-log: classpath:db/changelog/db.changelog-master.xml
 
   datasource:
-    url: ${POSTGRES_DB_URL:jdbc:postgresql://wallet_database:5432/wallet}
-#    url: ${POSTGRES_DB_URL:jdbc:postgresql://localhost:5432/wallet}
+#    url: ${POSTGRES_DB_URL:jdbc:postgresql://wallet_database:5432/wallet}
+    url: ${POSTGRES_DB_URL:jdbc:postgresql://localhost:5432/wallet}
     username: ${POSTGRES_USER:postgres}
     password: ${POSTGRES_PASSWORD:secret}
     driverClassName: org.postgresql.Driver

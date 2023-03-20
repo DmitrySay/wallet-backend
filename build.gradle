@@ -29,7 +29,7 @@ ext {
     lombokVersion = '1.18.26'
     mapstructVersion = '1.4.2.Final'
     postgresqlVersion = '42.2.27'
-    flywayVersion = '9.15.2'
+    liquibaseVersion = '4.17.2'
     jsonwebtokenVersion = '0.11.5'
 }
 
@@ -50,7 +50,7 @@ dependencies {
     implementation "ch.qos.logback:logback-core"
 
     implementation "org.postgresql:postgresql:${postgresqlVersion}"
-    implementation "org.flywaydb:flyway-core:${flywayVersion}"
+    implementation "org.liquibase:liquibase-core:${liquibaseVersion}"
 
     //mapstruct
     annotationProcessor "org.mapstruct:mapstruct-processor:${mapstructVersion}"
