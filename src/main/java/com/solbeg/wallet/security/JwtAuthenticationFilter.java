@@ -8,7 +8,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.context.SecurityContextHolderStrategy;
+import org.springframework.security.web.context.RequestAttributeSecurityContextRepository;
+import org.springframework.security.web.context.SecurityContextRepository;
 import org.springframework.util.Assert;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -16,6 +20,11 @@ import java.io.IOException;
 
 @Slf4j
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
+
+    private final SecurityContextHolderStrategy securityContextHolderStrategy = SecurityContextHolder
+            .getContextHolderStrategy();
+
+    private final SecurityContextRepository securityContextRepository = new RequestAttributeSecurityContextRepository();
 
     private final JwtTokenProvider jwtTokenProvider;
 
@@ -31,10 +40,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             String token = jwtTokenProvider.resolveToken(request);
             if (token != null && jwtTokenProvider.validateToken(token)) {
                 Authentication authentication = jwtTokenProvider.getAuthentication(token);
-                SecurityContextHolder.getContext().setAuthentication(authentication);
+
+                SecurityContext context = this.securityContextHolderStrategy.createEmptyContext();
+                context.setAuthentication(authentication);
+                this.securityContextHolderStrategy.setContext(context);
+                this.securityContextRepository.saveContext(context, request, response);
             }
         } catch (AuthenticationException ex) {
-            SecurityContextHolder.clearContext();
+            this.securityContextHolderStrategy.clearContext();
             log.error("Failed to process token authentication request", ex);
             printMessage(response, ex.getMessage());
             return;
