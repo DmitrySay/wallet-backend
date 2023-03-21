@@ -13,7 +13,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.context.SecurityContextHolderStrategy;
 import org.springframework.security.web.context.RequestAttributeSecurityContextRepository;
 import org.springframework.security.web.context.SecurityContextRepository;
-import org.springframework.util.Assert;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
@@ -24,13 +23,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final SecurityContextHolderStrategy securityContextHolderStrategy = SecurityContextHolder
             .getContextHolderStrategy();
 
-    private final SecurityContextRepository securityContextRepository = new RequestAttributeSecurityContextRepository();
+    private final SecurityContextRepository securityContextRepository;
 
     private final JwtTokenProvider jwtTokenProvider;
 
     public JwtAuthenticationFilter(JwtTokenProvider jwtTokenProvider) {
-        Assert.notNull(jwtTokenProvider, "jwtTokenProvider cannot be null");
         this.jwtTokenProvider = jwtTokenProvider;
+        this.securityContextRepository = new RequestAttributeSecurityContextRepository();
     }
 
     @Override

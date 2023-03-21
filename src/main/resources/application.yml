@@ -32,3 +32,6 @@ jwt:
   token:
     secret: '"${JWT_GENERATOR_SIGNATURE_SECRET:pleaseChangeThisSecretForANewOne}"'
     expired: 3600000
+
+cors:
+  urls: '${CORS_URL:http://localhost:3000;http://localhost}'

@@ -65,7 +65,7 @@ public class JwtTokenProvider {
         try {
             String username = getUsername(token);
             UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-            return new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+            return UsernamePasswordAuthenticationToken.authenticated(userDetails, null, userDetails.getAuthorities());
         } catch (Exception exception) {
             throw new BadCredentialsException("JWT token invalid.");
         }

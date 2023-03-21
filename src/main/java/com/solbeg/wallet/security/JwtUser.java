@@ -2,15 +2,13 @@ package com.solbeg.wallet.security;
 
 import com.solbeg.wallet.model.User;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
-import java.util.HashSet;
 
 
 public class JwtUser extends User implements UserDetails {
-
-    private final boolean enabled = true;
 
     public JwtUser(Long id, String email, String password) {
         super(id, email, password);
@@ -53,12 +51,12 @@ public class JwtUser extends User implements UserDetails {
      */
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        Collection<GrantedAuthority> authorities = new HashSet<>();
-        return authorities;
+        //todo add roles
+        return AuthorityUtils.NO_AUTHORITIES;
     }
 
     @Override
     public boolean isEnabled() {
-        return enabled;
+        return true;
     }
 }
