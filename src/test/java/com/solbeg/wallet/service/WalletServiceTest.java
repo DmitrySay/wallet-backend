@@ -1,7 +1,9 @@
 package com.solbeg.wallet.service;
 
 import com.solbeg.wallet.dto.WalletAddAmountRequest;
-import com.solbeg.wallet.dto.WalletResponse;
+import com.solbeg.wallet.dto.WalletRemoveAmountRequest;
+import com.solbeg.wallet.dto.WalletTransferAmountRequest;
+import com.solbeg.wallet.exceptions.RestException;
 import com.solbeg.wallet.mapper.WalletMapper;
 import com.solbeg.wallet.model.Wallet;
 import com.solbeg.wallet.repository.WalletRepository;
@@ -15,7 +17,7 @@ import java.math.BigDecimal;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -34,37 +36,90 @@ class WalletServiceTest {
     WalletService walletService;
 
     @Test
-    void addAmountToWallet() {
+    void testAddAmountToWallet() {
         //given
+        Wallet wallet = new Wallet();
+        wallet.setId(1L);
+        wallet.setBalance(new BigDecimal("100.01"));
+
         WalletAddAmountRequest request = new WalletAddAmountRequest();
         request.setWalletId(1L);
-        request.setAmount(new BigDecimal("5.60"));
-
-        Wallet existingWallet = new Wallet();
-        existingWallet.setId(1L);
-        existingWallet.setName("wallet");
-        existingWallet.setDescription("USD");
-        existingWallet.setBalance(new BigDecimal("10.50"));
-        Optional<Wallet> mockWallet = Optional.of(existingWallet);
-
-        WalletResponse walletResponse = new WalletResponse();
-        walletResponse.setId(1L);
-        walletResponse.setName("wallet");
-        walletResponse.setDescription("USD");
-        walletResponse.setBalance(new BigDecimal("16.10"));
+        request.setAmount(new BigDecimal("50.01"));
 
         //when
-        when(walletRepository.findById(1L)).thenReturn(mockWallet);
-        when(walletMapper.toDto(any(Wallet.class))).thenReturn(walletResponse);
-
-        WalletResponse response = walletService.addAmountToWallet(request);
+        when(walletRepository.findById(1L)).thenReturn(Optional.of(wallet));
+        walletService.addAmountToWallet(request);
 
         //then
-        verify(walletRepository, times(1)).save(existingWallet);
-        assertEquals(response.getId(), existingWallet.getId());
-        assertEquals(response.getName(), existingWallet.getName());
-        assertEquals(response.getDescription(), existingWallet.getDescription());
-        assertEquals(0, response.getBalance().compareTo(walletResponse.getBalance()));
+        verify(walletRepository, times(1)).save(wallet);
+        assertEquals(new BigDecimal("150.02"), wallet.getBalance());
+    }
+
+    @Test
+    void testRemoveAmountFromWallet() {
+        //given
+        Wallet wallet = new Wallet();
+        wallet.setId(1L);
+        wallet.setBalance(new BigDecimal("100.02"));
+
+        WalletRemoveAmountRequest request = new WalletRemoveAmountRequest();
+        request.setWalletId(1L);
+        request.setAmount(new BigDecimal("50.02"));
+
+        //when
+        when(walletRepository.findById(1L)).thenReturn(Optional.of(wallet));
+        walletService.removeAmountFromWallet(request);
+
+        verify(walletRepository).save(wallet);
+        assertEquals(new BigDecimal("50.00"), wallet.getBalance());
+    }
+
+    @Test
+    void testRemoveAmountFromWallet_and_catch_validation() {
+        //given
+        Wallet wallet = new Wallet();
+        wallet.setId(1L);
+        wallet.setBalance(new BigDecimal("100.02"));
+
+        WalletRemoveAmountRequest request = new WalletRemoveAmountRequest();
+        request.setWalletId(1L);
+        request.setAmount(new BigDecimal("150"));
+
+        //when
+        when(walletRepository.findById(1L)).thenReturn(Optional.of(wallet));
+
+        RestException restException = assertThrows(RestException.class, () -> {
+            walletService.removeAmountFromWallet(request);
+        });
+
+        //then
+        assertEquals(new BigDecimal("100.02"), wallet.getBalance());
+        assertEquals("Balance is less then zero. Not allowed.", restException.getMessage());
+    }
+
+
+    @Test
+    void testTransferAmount() {
+        WalletTransferAmountRequest request = new WalletTransferAmountRequest();
+        request.setWalletIdFrom(1L);
+        request.setWalletIdTo(2L);
+        request.setAmount(new BigDecimal("100"));
+
+        Wallet walletFrom = new Wallet();
+        walletFrom.setId(1L);
+        walletFrom.setBalance(new BigDecimal("300"));
+
+        Wallet walletTo = new Wallet();
+        walletTo.setId(2L);
+        walletTo.setBalance(new BigDecimal("100"));
+
+        when(walletRepository.findById(1L)).thenReturn(Optional.of(walletFrom));
+        when(walletRepository.findById(2L)).thenReturn(Optional.of(walletTo));
+
+        walletService.transferAmount(request);
+
+        assertEquals(new BigDecimal("200"), walletFrom.getBalance());
+        assertEquals(new BigDecimal("200"), walletTo.getBalance());
     }
 
 }
